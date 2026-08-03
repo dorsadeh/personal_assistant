@@ -1,0 +1,20 @@
+{
+  "model": "sonnet",
+  "permissions": {
+    "allow": [
+      "Read(./**)",
+      "Write(./**)",
+      "Edit(./**)",
+      "Glob(./**)",
+      "Grep(./**)",
+      "WebSearch",
+      "WebFetch"
+    ],
+    "deny": [
+      "Bash",
+      "Read(./.claude/**)",
+      "Write(./.claude/**)",
+      "Edit(./.claude/**)"
+    ]
+  }
+}
