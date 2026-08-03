@@ -4,7 +4,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from bot.claude_runner import ClaudeError, build_command, run_claude
+from bot.claude_runner import ALLOWED_TOOLS, ClaudeError, build_command, run_claude
 
 
 def _fake_result(payload, returncode=0, stderr=""):
@@ -20,13 +20,17 @@ SUCCESS = {"is_error": False, "result": "done!", "session_id": "abc-123", "type"
 
 def test_build_command_new_session():
     cmd = build_command("hello", None, "claude")
-    assert cmd == ["claude", "-p", "--output-format", "json", "hello"]
+    assert cmd == [
+        "claude", "-p", "--allowedTools", *ALLOWED_TOOLS,
+        "--output-format", "json", "hello",
+    ]
 
 
 def test_build_command_resume():
     cmd = build_command("hello", "abc-123", "claude")
     assert "--resume" in cmd and "abc-123" in cmd
     assert cmd[-1] == "hello"
+    assert cmd.index("--output-format") > cmd.index("--allowedTools")
 
 
 def test_run_claude_success(monkeypatch, tmp_path):

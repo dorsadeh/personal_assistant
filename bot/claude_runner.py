@@ -7,8 +7,24 @@ class ClaudeError(Exception):
     """Raised when a headless Claude invocation fails."""
 
 
+# Invoker-side sandbox: file tools scoped to the workspace cwd, plus web.
+# Passed as CLI flags because settings.json allow rules are ignored when the
+# workspace directory has not been interactively trusted.
+ALLOWED_TOOLS = [
+    "Read(./**)",
+    "Write(./**)",
+    "Edit(./**)",
+    "Glob(./**)",
+    "Grep(./**)",
+    "WebSearch",
+    "WebFetch",
+]
+
+
 def build_command(prompt: str, session_id: str | None, claude_bin: str) -> list[str]:
-    cmd = [claude_bin, "-p", "--output-format", "json"]
+    # --allowedTools is variadic: keep --output-format after it so the
+    # positional prompt is never swallowed by the tool list.
+    cmd = [claude_bin, "-p", "--allowedTools", *ALLOWED_TOOLS, "--output-format", "json"]
     if session_id:
         cmd += ["--resume", session_id]
     cmd.append(prompt)
