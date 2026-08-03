@@ -21,4 +21,4 @@ def chunk_message(text: str, limit: int = TELEGRAM_LIMIT) -> list[str]:
         text = text[split:].lstrip("\n")
     if text:
         chunks.append(text)
-    return chunks or ["(empty reply)"]
+    return chunks

@@ -22,5 +22,8 @@ powered by headless Claude Code running in `workspace/`.
 ## Architecture
 Telegram group → python-telegram-bot daemon (serial queue) →
 `claude -p --resume <session>` in `workspace/` → reply → Telegram.
-The workspace is sandboxed by `workspace/.claude/settings.json`
-(file tools + web only, no Bash). Data lives in markdown files, tracked in git.
+The sandbox is enforced by invoker-passed `--allowedTools`/`--disallowedTools`
+flags (file tools + web only, no Bash, `.claude/**` off-limits — see
+`bot/claude_runner.py`); `workspace/.claude/settings.json` provides the model
+choice and matching deny rules as defense-in-depth. Data lives in markdown
+files, tracked in git.

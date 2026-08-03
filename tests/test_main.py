@@ -24,7 +24,9 @@ def _config(tmp_path):
 def _update(chat_id=-100123, text="hello"):
     message = SimpleNamespace(text=text, reply_text=AsyncMock())
     return SimpleNamespace(
-        effective_chat=SimpleNamespace(id=chat_id), message=message
+        effective_chat=SimpleNamespace(id=chat_id),
+        message=message,
+        effective_message=message,
     )
 
 
@@ -99,6 +101,24 @@ async def test_error_reported_to_chat(tmp_path, monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_handle_message_uses_effective_message_when_message_is_none(
+    tmp_path, monkeypatch
+):
+    config = _config(tmp_path)
+    store = SessionStore(tmp_path / "sessions.json")
+    monkeypatch.setattr(main_mod, "run_claude", lambda *a, **k: ("the reply", "sess-1"))
+    effective_message = SimpleNamespace(text="hello", reply_text=AsyncMock())
+    update = SimpleNamespace(
+        effective_chat=SimpleNamespace(id=-100123),
+        message=None,
+        effective_message=effective_message,
+    )
+    await main_mod.handle_message(update, _context(config, store))
+    effective_message.reply_text.assert_awaited_once_with("the reply")
+    assert store.get(-100123) == "sess-1"
+
+
+@pytest.mark.asyncio
 async def test_new_command_clears_session(tmp_path):
     config = _config(tmp_path)
     store = SessionStore(tmp_path / "sessions.json")
@@ -116,3 +136,10 @@ def test_build_app_registers_handlers(tmp_path):
     assert app.bot_data["config"] is config
     assert app.bot_data["store"] is store
     assert len(app.handlers[0]) == 4
+
+
+def test_build_app_registers_error_handler(tmp_path):
+    config = _config(tmp_path)
+    store = SessionStore(tmp_path / "sessions.json")
+    app = main_mod.build_app(config, store)
+    assert app.error_handlers

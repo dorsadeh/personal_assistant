@@ -5,6 +5,7 @@ Wants=network-online.target
 
 [Service]
 WorkingDirectory=%h/workspace/sandbox/personal_projects/personal_assistant
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
 ExecStart=%h/workspace/sandbox/personal_projects/personal_assistant/.venv/bin/python -m bot.main
 Restart=always
 RestartSec=5

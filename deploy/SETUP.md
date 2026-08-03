@@ -3,9 +3,10 @@
 1. Install prerequisites: git, python3.12+, Node 18+ (for Claude Code).
 2. Install Claude Code: `npm install -g @anthropic-ai/claude-code`
 3. Authenticate with the Claude subscription (one-time, needs a browser
-   anywhere): run `claude setup-token` on any machine, copy the token, and on
-   the server put it in the service environment:
-   add `CLAUDE_CODE_OAUTH_TOKEN=...` to `.env`.
+   anywhere): run `claude setup-token` on any machine, copy the token, and add
+   `CLAUDE_CODE_OAUTH_TOKEN=...` to the `.env` file on the server. The app
+   loads `.env` itself (via python-dotenv) at startup — there is no systemd
+   `EnvironmentFile`, so this is the only place the token needs to go.
 4. Clone: `git clone https://github.com/dorsadeh/personal_assistant.git && cd personal_assistant`
 5. `python3 -m venv .venv && .venv/bin/pip install -r requirements.txt`
 6. `cp .env.example .env` and fill in `TELEGRAM_BOT_TOKEN` and `ALLOWED_CHAT_IDS`.
@@ -17,7 +18,8 @@
    systemctl --user daemon-reload
    systemctl --user enable --now assistant
    loginctl enable-linger $USER   # keep it running after logout
-9. Logs: `journalctl --user -u assistant -f`
+9. Logs: `journalctl --user -u assistant -f` — if the bot is silent in
+   Telegram, this is the first place to look.
 
 Note: if the repo lives at a different path on the new machine, edit the two
 paths in `assistant.service` accordingly.

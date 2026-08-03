@@ -1,5 +1,9 @@
 import json
+import logging
+import os
 from pathlib import Path
+
+log = logging.getLogger("assistant.sessions")
 
 
 class SessionStore:
@@ -10,12 +14,18 @@ class SessionStore:
 
     def _load(self) -> dict:
         if self.path.exists():
-            return json.loads(self.path.read_text())
+            try:
+                return json.loads(self.path.read_text())
+            except json.JSONDecodeError:
+                log.warning("session store at %s is corrupted; starting fresh", self.path)
+                return {}
         return {}
 
     def _save(self, data: dict) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.path.write_text(json.dumps(data, indent=2))
+        tmp_path = self.path.with_suffix(".tmp")
+        tmp_path.write_text(json.dumps(data, indent=2))
+        os.replace(tmp_path, self.path)
 
     def get(self, chat_id: int) -> str | None:
         return self._load().get(str(chat_id))

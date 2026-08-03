@@ -20,14 +20,27 @@ ALLOWED_TOOLS = [
     "WebFetch",
 ]
 
+# Invoker-side deny rules: ALLOWED_TOOLS grants Write/Edit/Read under ./** ,
+# which includes .claude/ itself. Settings-file deny rules are not enforced
+# in an untrusted workspace, so carve .claude/** out here too.
+DISALLOWED_TOOLS = [
+    "Read(./.claude/**)",
+    "Write(./.claude/**)",
+    "Edit(./.claude/**)",
+]
 
-def build_command(prompt: str, session_id: str | None, claude_bin: str) -> list[str]:
-    # --allowedTools is variadic: keep --output-format after it so the
-    # positional prompt is never swallowed by the tool list.
-    cmd = [claude_bin, "-p", "--allowedTools", *ALLOWED_TOOLS, "--output-format", "json"]
+
+def build_command(session_id: str | None, claude_bin: str) -> list[str]:
+    # --allowedTools/--disallowedTools are variadic: keep --output-format
+    # after them so it is never swallowed by a tool list.
+    cmd = [
+        claude_bin, "-p",
+        "--allowedTools", *ALLOWED_TOOLS,
+        "--disallowedTools", *DISALLOWED_TOOLS,
+        "--output-format", "json",
+    ]
     if session_id:
         cmd += ["--resume", session_id]
-    cmd.append(prompt)
     return cmd
 
 
@@ -38,10 +51,11 @@ def run_claude(
     claude_bin: str = "claude",
     timeout: int = 300,
 ) -> tuple[str, str]:
-    cmd = build_command(prompt, session_id, claude_bin)
+    cmd = build_command(session_id, claude_bin)
     try:
         proc = subprocess.run(
-            cmd, cwd=workspace, capture_output=True, text=True, timeout=timeout
+            cmd, cwd=workspace, input=prompt, capture_output=True, text=True,
+            timeout=timeout,
         )
     except subprocess.TimeoutExpired:
         raise ClaudeError(f"Claude timed out after {timeout}s")
@@ -53,6 +67,8 @@ def run_claude(
         data = json.loads(proc.stdout)
     except json.JSONDecodeError:
         raise ClaudeError(f"claude returned unexpected output: {proc.stdout[:200]}")
+    if not isinstance(data, dict) or "result" not in data or "session_id" not in data:
+        raise ClaudeError(f"claude returned unexpected JSON shape: {proc.stdout[:200]}")
     if data.get("is_error"):
         raise ClaudeError(data.get("result") or "unknown Claude error")
     return data["result"], data["session_id"]
