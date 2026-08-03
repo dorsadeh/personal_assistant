@@ -1,0 +1,4 @@
+python-telegram-bot>=21
+python-dotenv>=1
+pytest>=8
+pytest-asyncio>=0.23
