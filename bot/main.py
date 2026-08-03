@@ -77,6 +77,12 @@ def build_app(config: Config, store: SessionStore) -> Application:
     app.add_handler(
         MessageHandler(allowed & filters.TEXT & ~filters.COMMAND, handle_message)
     )
+
+    async def log_rejected(update, context):
+        if update.effective_chat:
+            log.info("ignored update from chat %s", update.effective_chat.id)
+
+    app.add_handler(MessageHandler(~allowed, log_rejected))
     app.bot_data["config"] = config
     app.bot_data["store"] = store
     return app

@@ -1,0 +1,13 @@
+[Unit]
+Description=Household assistant Telegram bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+WorkingDirectory=%h/workspace/sandbox/personal_projects/personal_assistant
+ExecStart=%h/workspace/sandbox/personal_projects/personal_assistant/.venv/bin/python -m bot.main
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

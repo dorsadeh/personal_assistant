@@ -115,4 +115,4 @@ def test_build_app_registers_handlers(tmp_path):
     app = main_mod.build_app(config, store)
     assert app.bot_data["config"] is config
     assert app.bot_data["store"] is store
-    assert len(app.handlers[0]) == 3
+    assert len(app.handlers[0]) == 4
