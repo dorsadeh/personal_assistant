@@ -74,3 +74,14 @@ def test_not_a_repo_does_not_raise(tmp_path):
     plain = tmp_path / "plain"
     plain.mkdir()
     assert sync_workspace(plain, "Dor: x") is False
+
+
+def test_missing_workspace_dir_does_not_raise(tmp_path):
+    assert sync_workspace(tmp_path / "does-not-exist", "Dor: x") is False
+
+
+def test_multiline_summary_becomes_single_line_subject(tmp_path):
+    ws, origin = _make_workspace(tmp_path)
+    (ws / "new.md").write_text("x")
+    sync_workspace(ws, "Dor: line one\nline two")
+    assert _origin_head_subject(origin) == "assistant: Dor: line one line two"

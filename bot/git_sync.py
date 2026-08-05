@@ -15,11 +15,11 @@ def sync_workspace(workspace: Path, summary: str) -> bool:
     try:
         if _git(workspace, "status", "--porcelain").strip():
             _git(workspace, "add", "-A")
-            summary = summary.strip() or "update"
+            summary = " ".join(summary.split()) or "update"
             _git(workspace, "commit", "-m", f"assistant: {summary[:50]}")
             committed = True
         _git(workspace, "push")
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as err:
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, OSError) as err:
         detail = getattr(err, "stderr", "") or str(err)
         log.warning("workspace sync incomplete: %s", detail.strip())
     return committed
