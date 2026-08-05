@@ -22,7 +22,9 @@ def _config(tmp_path):
 
 
 def _update(chat_id=-100123, text="hello"):
-    message = SimpleNamespace(text=text, reply_text=AsyncMock())
+    message = SimpleNamespace(
+        text=text, reply_text=AsyncMock(), from_user=SimpleNamespace(first_name="Dor")
+    )
     return SimpleNamespace(
         effective_chat=SimpleNamespace(id=chat_id),
         message=message,
@@ -42,10 +44,33 @@ async def test_message_gets_claude_reply(tmp_path, monkeypatch):
     config = _config(tmp_path)
     store = SessionStore(tmp_path / "sessions.json")
     monkeypatch.setattr(main_mod, "run_claude", lambda *a, **k: ("the reply", "sess-1"))
+    sync_calls = []
+    monkeypatch.setattr(
+        main_mod,
+        "sync_workspace",
+        lambda workspace, summary: sync_calls.append((workspace, summary)),
+    )
     update = _update()
     await main_mod.handle_message(update, _context(config, store))
     update.message.reply_text.assert_awaited_once_with("the reply")
     assert store.get(-100123) == "sess-1"
+    assert sync_calls == [(config.workspace_dir, "Dor: hello")]
+
+
+@pytest.mark.asyncio
+async def test_prompt_carries_sender_name(tmp_path, monkeypatch):
+    config = _config(tmp_path)
+    store = SessionStore(tmp_path / "sessions.json")
+    seen = {}
+
+    def fake_run(prompt, workspace, session_id=None, **kwargs):
+        seen["prompt"] = prompt
+        return ("ok", "sess-1")
+
+    monkeypatch.setattr(main_mod, "run_claude", fake_run)
+    monkeypatch.setattr(main_mod, "sync_workspace", lambda *a, **k: None)
+    await main_mod.handle_message(_update(), _context(config, store))
+    assert seen["prompt"] == "Dor: hello"
 
 
 @pytest.mark.asyncio
@@ -60,6 +85,7 @@ async def test_resumes_existing_session(tmp_path, monkeypatch):
         return ("ok", "old-sess")
 
     monkeypatch.setattr(main_mod, "run_claude", fake_run)
+    monkeypatch.setattr(main_mod, "sync_workspace", lambda *a, **k: None)
     await main_mod.handle_message(_update(), _context(config, store))
     assert seen["session_id"] == "old-sess"
 
@@ -78,6 +104,7 @@ async def test_stale_session_retries_fresh(tmp_path, monkeypatch):
         return ("fresh reply", "new-sess")
 
     monkeypatch.setattr(main_mod, "run_claude", fake_run)
+    monkeypatch.setattr(main_mod, "sync_workspace", lambda *a, **k: None)
     update = _update()
     await main_mod.handle_message(update, _context(config, store))
     assert calls == ["stale", None]
@@ -94,6 +121,7 @@ async def test_error_reported_to_chat(tmp_path, monkeypatch):
         raise ClaudeError("usage limit reached")
 
     monkeypatch.setattr(main_mod, "run_claude", fake_run)
+    monkeypatch.setattr(main_mod, "sync_workspace", lambda *a, **k: None)
     update = _update()
     await main_mod.handle_message(update, _context(config, store))
     (reply,), _ = update.message.reply_text.await_args
@@ -107,7 +135,10 @@ async def test_handle_message_uses_effective_message_when_message_is_none(
     config = _config(tmp_path)
     store = SessionStore(tmp_path / "sessions.json")
     monkeypatch.setattr(main_mod, "run_claude", lambda *a, **k: ("the reply", "sess-1"))
-    effective_message = SimpleNamespace(text="hello", reply_text=AsyncMock())
+    monkeypatch.setattr(main_mod, "sync_workspace", lambda *a, **k: None)
+    effective_message = SimpleNamespace(
+        text="hello", reply_text=AsyncMock(), from_user=SimpleNamespace(first_name="Dor")
+    )
     update = SimpleNamespace(
         effective_chat=SimpleNamespace(id=-100123),
         message=None,

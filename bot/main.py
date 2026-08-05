@@ -13,6 +13,7 @@ from telegram.ext import (
 
 from bot.claude_runner import ClaudeError, run_claude
 from bot.config import Config, load_config
+from bot.git_sync import sync_workspace
 from bot.sessions import SessionStore
 from bot.telegram_format import chunk_message
 
@@ -32,6 +33,9 @@ async def handle_message(update, context) -> None:
     message = update.effective_message
     chat_id = update.effective_chat.id
     prompt = message.text
+    user = update.effective_message.from_user
+    sender = user.first_name if user and user.first_name else "Someone"
+    prompt = f"{sender}: {prompt}"
     await context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
 
     session_id = store.get(chat_id)
@@ -57,6 +61,8 @@ async def handle_message(update, context) -> None:
     store.set(chat_id, new_session)
     for chunk in chunk_message(reply):
         await message.reply_text(chunk)
+
+    await asyncio.to_thread(sync_workspace, config.workspace_dir, prompt)
 
 
 async def new_cmd(update, context) -> None:
