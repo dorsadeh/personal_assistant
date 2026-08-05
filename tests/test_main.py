@@ -104,12 +104,18 @@ async def test_stale_session_retries_fresh(tmp_path, monkeypatch):
         return ("fresh reply", "new-sess")
 
     monkeypatch.setattr(main_mod, "run_claude", fake_run)
-    monkeypatch.setattr(main_mod, "sync_workspace", lambda *a, **k: None)
+    sync_calls = []
+    monkeypatch.setattr(
+        main_mod,
+        "sync_workspace",
+        lambda workspace, summary: sync_calls.append((workspace, summary)),
+    )
     update = _update()
     await main_mod.handle_message(update, _context(config, store))
     assert calls == ["stale", None]
     update.message.reply_text.assert_awaited_once_with("fresh reply")
     assert store.get(-100123) == "new-sess"
+    assert sync_calls == [(config.workspace_dir, "Dor: hello")]
 
 
 @pytest.mark.asyncio
@@ -121,11 +127,17 @@ async def test_error_reported_to_chat(tmp_path, monkeypatch):
         raise ClaudeError("usage limit reached")
 
     monkeypatch.setattr(main_mod, "run_claude", fake_run)
-    monkeypatch.setattr(main_mod, "sync_workspace", lambda *a, **k: None)
+    sync_calls = []
+    monkeypatch.setattr(
+        main_mod,
+        "sync_workspace",
+        lambda workspace, summary: sync_calls.append((workspace, summary)),
+    )
     update = _update()
     await main_mod.handle_message(update, _context(config, store))
     (reply,), _ = update.message.reply_text.await_args
     assert "usage limit reached" in reply
+    assert sync_calls == []
 
 
 @pytest.mark.asyncio

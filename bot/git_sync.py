@@ -19,15 +19,14 @@ def sync_workspace(workspace: Path, summary: str) -> bool:
             _git(workspace, "commit", "-m", f"assistant: {summary[:50]}")
             committed = True
         _git(workspace, "push")
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, OSError) as err:
-        detail = getattr(err, "stderr", "") or str(err)
-        log.warning("workspace sync incomplete: %s", detail.strip())
+    except Exception:
+        log.exception("workspace sync incomplete")
     return committed
 
 
 def _git(workspace: Path, *args: str) -> str:
     proc = subprocess.run(
-        ["git", *args], cwd=workspace, capture_output=True, text=True, timeout=60
+        ["git", *args], cwd=workspace, capture_output=True, text=True, timeout=15
     )
     if proc.returncode != 0:
         raise subprocess.CalledProcessError(

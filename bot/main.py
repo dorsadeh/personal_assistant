@@ -21,7 +21,8 @@ log = logging.getLogger("assistant")
 
 HELP_TEXT = (
     "I'm your household assistant. Just talk to me — I keep our shared "
-    "todo list, ideas, and travel plans.\n\n"
+    "todo list, \"remember this\" lists (books, series, places...), ideas, "
+    "and travel plans.\n\n"
     "/new — start a fresh conversation (I keep my files, lose the chat thread)\n"
     "/help — this message"
 )
@@ -116,6 +117,11 @@ def main() -> None:
         level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s"
     )
     config = load_config()
+    if not config.workspace_dir.is_dir():
+        raise SystemExit(
+            f"workspace missing — clone sadeh-family-notebook into "
+            f"{config.workspace_dir} (see deploy/SETUP.md)"
+        )
     store = SessionStore(config.data_dir / "sessions.json")
     app = build_app(config, store)
     log.info("assistant starting; workspace=%s", config.workspace_dir)

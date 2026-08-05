@@ -85,3 +85,13 @@ def test_multiline_summary_becomes_single_line_subject(tmp_path):
     (ws / "new.md").write_text("x")
     sync_workspace(ws, "Dor: line one\nline two")
     assert _origin_head_subject(origin) == "assistant: Dor: line one line two"
+
+
+def test_unexpected_error_does_not_raise(tmp_path, monkeypatch):
+    import bot.git_sync as gs
+
+    def boom(*a, **k):
+        raise ValueError("unexpected")
+
+    monkeypatch.setattr(gs.subprocess, "run", boom)
+    assert sync_workspace(tmp_path, "Dor: x") is False
