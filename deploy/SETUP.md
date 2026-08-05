@@ -8,6 +8,10 @@
    loads `.env` itself (via python-dotenv) at startup — there is no systemd
    `EnvironmentFile`, so this is the only place the token needs to go.
 4. Clone: `git clone https://github.com/dorsadeh/personal_assistant.git && cd personal_assistant`
+   Then clone the family notebook (the assistant's data) into `workspace/`:
+   `git clone https://github.com/dorsadeh/sadeh-family-notebook.git workspace`
+   (the code repo ignores `workspace/` — data lives in its own private repo,
+   and the daemon auto-pushes changes to it).
 5. `python3 -m venv .venv && .venv/bin/pip install -r requirements.txt`
 6. `cp .env.example .env` and fill in `TELEGRAM_BOT_TOKEN` and `ALLOWED_CHAT_IDS`.
 7. Test in foreground: `.venv/bin/python -m bot.main` — send a message in the

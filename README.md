@@ -27,3 +27,6 @@ flags (file tools + web only, no Bash, `.claude/**` off-limits — see
 `bot/claude_runner.py`); `workspace/.claude/settings.json` provides the model
 choice and matching deny rules as defense-in-depth. Data lives in markdown
 files, tracked in git.
+Data lives in a separate private repo ([sadeh-family-notebook](https://github.com/dorsadeh/sadeh-family-notebook))
+cloned at `workspace/`; the daemon auto-commits and pushes every assistant
+change there (browse it in the GitHub app; full history; off-PC backup).
