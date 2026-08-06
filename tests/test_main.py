@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
@@ -36,6 +37,22 @@ def _context(config, store):
     return SimpleNamespace(
         bot_data={"config": config, "store": store},
         bot=SimpleNamespace(send_chat_action=AsyncMock()),
+    )
+
+
+def _file_update(document=None, photo=None, caption=None):
+    message = SimpleNamespace(
+        document=document,
+        photo=photo,
+        caption=caption,
+        date=datetime(2026, 8, 6, 12, 0),
+        reply_text=AsyncMock(),
+        from_user=SimpleNamespace(first_name="Dor"),
+    )
+    return SimpleNamespace(
+        effective_chat=SimpleNamespace(id=-100123),
+        message=message,
+        effective_message=message,
     )
 
 
@@ -172,13 +189,122 @@ async def test_new_command_clears_session(tmp_path):
     update.message.reply_text.assert_awaited_once()
 
 
+@pytest.mark.asyncio
+async def test_document_downloaded_and_prompt_built(tmp_path, monkeypatch):
+    config = _config(tmp_path)
+    store = SessionStore(tmp_path / "sessions.json")
+    download_calls = []
+
+    async def fake_download_to_drive(path):
+        download_calls.append(path)
+
+    document = SimpleNamespace(
+        file_size=1024,
+        file_name="Road Toll.pdf",
+        get_file=AsyncMock(
+            return_value=SimpleNamespace(
+                download_to_drive=AsyncMock(side_effect=fake_download_to_drive)
+            )
+        ),
+    )
+    update = _file_update(document=document, caption="pay by Friday")
+
+    seen = {}
+
+    def fake_run(prompt, workspace, session_id=None, *args, **kwargs):
+        seen["prompt"] = prompt
+        return ("ok", "sess-1")
+
+    monkeypatch.setattr(main_mod, "run_claude", fake_run)
+    monkeypatch.setattr(main_mod, "sync_workspace", lambda *a, **k: None)
+
+    await main_mod.handle_file(update, _context(config, store))
+
+    assert len(download_calls) == 1
+    dest = download_calls[0]
+    assert dest.parent == tmp_path / "ws" / "files" / "2026-08"
+    assert dest.name == "Road-Toll.pdf"
+    assert "files/2026-08/Road-Toll.pdf" in seen["prompt"]
+    assert "pay by Friday" in seen["prompt"]
+
+
+@pytest.mark.asyncio
+async def test_oversized_document_refused(tmp_path, monkeypatch):
+    config = _config(tmp_path)
+    store = SessionStore(tmp_path / "sessions.json")
+    document = SimpleNamespace(
+        file_size=25 * 1024 * 1024,
+        file_name="big.pdf",
+        get_file=AsyncMock(),
+    )
+    update = _file_update(document=document, caption=None)
+
+    run_calls = []
+    monkeypatch.setattr(
+        main_mod, "run_claude", lambda *a, **k: run_calls.append(1) or ("ok", "sess-1")
+    )
+    monkeypatch.setattr(main_mod, "sync_workspace", lambda *a, **k: None)
+
+    await main_mod.handle_file(update, _context(config, store))
+
+    (reply,), _ = update.message.reply_text.await_args
+    assert "20 MB" in reply
+    assert run_calls == []
+    document.get_file.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_photo_named_by_date(tmp_path, monkeypatch):
+    config = _config(tmp_path)
+    store = SessionStore(tmp_path / "sessions.json")
+    download_calls = []
+
+    async def fake_download_to_drive(path):
+        download_calls.append(path)
+
+    photo = SimpleNamespace(
+        file_size=1024,
+        get_file=AsyncMock(
+            return_value=SimpleNamespace(
+                download_to_drive=AsyncMock(side_effect=fake_download_to_drive)
+            )
+        ),
+    )
+    update = _file_update(photo=[photo], caption=None)
+
+    seen = {}
+
+    def fake_run(prompt, workspace, session_id=None, *args, **kwargs):
+        seen["prompt"] = prompt
+        return ("ok", "sess-1")
+
+    monkeypatch.setattr(main_mod, "run_claude", fake_run)
+    monkeypatch.setattr(main_mod, "sync_workspace", lambda *a, **k: None)
+
+    await main_mod.handle_file(update, _context(config, store))
+
+    assert download_calls[0].name == "photo-20260806-120000.jpg"
+    assert "photo-20260806-120000.jpg" in seen["prompt"]
+
+
+@pytest.mark.asyncio
+async def test_unsupported_type_notice(tmp_path):
+    config = _config(tmp_path)
+    store = SessionStore(tmp_path / "sessions.json")
+    update = _file_update()
+    await main_mod.handle_unsupported(update, _context(config, store))
+    update.message.reply_text.assert_awaited_once_with(
+        "I can only handle text, documents, and photos for now."
+    )
+
+
 def test_build_app_registers_handlers(tmp_path):
     config = _config(tmp_path)
     store = SessionStore(tmp_path / "sessions.json")
     app = main_mod.build_app(config, store)
     assert app.bot_data["config"] is config
     assert app.bot_data["store"] is store
-    assert len(app.handlers[0]) == 4
+    assert len(app.handlers[0]) == 6
 
 
 def test_build_app_registers_error_handler(tmp_path):
