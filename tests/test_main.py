@@ -312,3 +312,26 @@ def test_build_app_registers_error_handler(tmp_path):
     store = SessionStore(tmp_path / "sessions.json")
     app = main_mod.build_app(config, store)
     assert app.error_handlers
+
+
+@pytest.mark.asyncio
+async def test_failed_download_cleans_up_and_replies(tmp_path, monkeypatch):
+    config = _config(tmp_path)
+    store = SessionStore(tmp_path / "sessions.json")
+    called = []
+    monkeypatch.setattr(main_mod, "run_claude", lambda *a, **k: called.append(a) or ("x", "s"))
+
+    async def boom(*a, **k):
+        raise RuntimeError("network died")
+
+    document = SimpleNamespace(
+        file_size=1000,
+        file_name="doc.pdf",
+        get_file=AsyncMock(side_effect=boom),
+    )
+    update = _file_update(document=document)
+    await main_mod.handle_file(update, _context(config, store))
+    (reply,), _ = update.effective_message.reply_text.await_args
+    assert "try sending it again" in reply
+    assert called == []
+    assert not list((tmp_path / "ws" / "files").rglob("*.pdf")) if (tmp_path / "ws" / "files").exists() else True

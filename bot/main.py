@@ -88,8 +88,16 @@ async def handle_file(update, context) -> None:
         )
         return
     dest = dest_path(config.workspace_dir / "files", original_name, f"{message.date:%Y-%m}")
-    tg_file = await source.get_file()
-    await tg_file.download_to_drive(dest)
+    try:
+        tg_file = await source.get_file()
+        await tg_file.download_to_drive(dest)
+    except Exception:
+        log.exception("download failed for %s", dest.name)
+        dest.unlink(missing_ok=True)
+        await message.reply_text(
+            "I couldn't download that file — please try sending it again."
+        )
+        return
     rel = dest.relative_to(config.workspace_dir)
     caption = message.caption or "(no caption)"
     prompt = (
