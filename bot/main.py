@@ -24,6 +24,7 @@ HELP_TEXT = (
     "I'm your household assistant. Just talk to me — I keep our shared "
     "todo list, \"remember this\" lists (books, series, places...), ideas, "
     "and travel plans.\n\n"
+    "You can also send me PDFs and photos to file.\n\n"
     "/new — start a fresh conversation (I keep my files, lose the chat thread)\n"
     "/help — this message"
 )
