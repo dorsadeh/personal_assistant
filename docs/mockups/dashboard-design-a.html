@@ -1,0 +1,391 @@
+<title>Dor & Tal — Notebook: 3 directions</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; -webkit-font-smoothing: antialiased; line-height: 1.5; }
+  .design { display: none; min-height: 100vh; }
+  body[data-pick="A"] .dA, body[data-pick="B"] .dB, body[data-pick="C"] .dC { display: block; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 0 20px 110px; }
+  .t { unicode-bidi: plaintext; }
+  .note { unicode-bidi: plaintext; }
+
+  /* ============ switcher ============ */
+  #bar {
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 50;
+    display: flex; gap: 4px; padding: 5px;
+    background: #16181D; border-radius: 999px; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  #bar button {
+    border: none; background: transparent; color: #B9BDC7;
+    font: 600 0.78rem system-ui, sans-serif; padding: 8px 14px; border-radius: 999px;
+    cursor: pointer; white-space: nowrap;
+  }
+  #bar button[aria-pressed="true"] { background: #F4F5F2; color: #16181D; }
+  #bar button:focus-visible { outline: 2px solid #F2B33D; outline-offset: 2px; }
+
+  /* ============ A · MAGNETS (Bauhaus fridge door) ============ */
+  .dA {
+    background: #F4F5F2; color: #16181D;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .dA .top { padding: 40px 0 20px; display: flex; flex-direction: column; gap: 14px; }
+  .dA .magnets { display: flex; gap: 10px; }
+  .dA .mag { width: 18px; height: 18px; }
+  .dA .mag.circle { border-radius: 50%; background: #2B4BD7; }
+  .dA .mag.tri { width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 18px solid #F2B33D; }
+  .dA .mag.square { background: #E0492F; border-radius: 3px; }
+  .dA h1 { margin: 0; font-size: clamp(2.4rem, 9vw, 3.4rem); font-weight: 800; letter-spacing: -0.035em; line-height: 1.02; }
+  .dA h1 .amp { color: #2B4BD7; }
+  .dA .subline { display: flex; justify-content: space-between; gap: 12px; font-size: 0.8rem; color: #5C6068; }
+  .dA .sync { font-family: ui-monospace, monospace; font-size: 0.7rem; display: inline-flex; gap: 6px; align-items: center; }
+  .dA .sync i { width: 7px; height: 7px; border-radius: 50%; background: #2B4BD7; }
+  .dA .stats { display: flex; border-top: 2px solid #16181D; margin-top: 8px; }
+  .dA .stat { flex: 1; padding: 14px 4px 0; }
+  .dA .stat + .stat { border-left: 1px solid #E2E4DF; padding-left: 18px; }
+  .dA .stat b { display: block; font-size: 2.2rem; font-weight: 800; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+  .dA .stat span { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: #5C6068; }
+  .dA section { margin-top: 44px; }
+  .dA .sechead { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .dA .sechead .mag { width: 14px; height: 14px; }
+  .dA .sechead .mag.tri { border-left-width: 8px; border-right-width: 8px; border-bottom-width: 14px; }
+  .dA .sechead h2 { margin: 0; font-size: 1.15rem; font-weight: 800; letter-spacing: -0.02em; }
+  .dA .sechead .src { margin-left: auto; font-family: ui-monospace, monospace; font-size: 0.66rem; color: #5C6068; }
+  .dA .card { background: #fff; border: 1px solid #E2E4DF; border-radius: 16px; box-shadow: 0 2px 8px rgba(22,24,29,0.06); overflow: hidden; }
+  .dA .item { display: flex; align-items: flex-start; gap: 14px; padding: 15px 16px; border-top: 1px solid #E2E4DF; }
+  .dA .item:first-child { border-top: none; }
+  .dA label.item { cursor: pointer; }
+  .dA label.item:hover { background: #EDF0FE; }
+  .dA .item input { appearance: none; width: 24px; height: 24px; margin: 1px 0 0; border: 2.5px solid #16181D; border-radius: 50%; background: none; cursor: pointer; flex-shrink: 0; position: relative; }
+  .dA .item input:checked { background: #2B4BD7; border-color: #2B4BD7; }
+  .dA .item input:checked::after { content: ""; position: absolute; left: 6px; top: 2.5px; width: 5px; height: 10px; border: solid #fff; border-width: 0 2.5px 2.5px 0; transform: rotate(45deg); }
+  .dA .item input:focus-visible { outline: 3px solid #F2B33D; outline-offset: 2px; }
+  .dA .item.checked .t { text-decoration: line-through; color: #9AA0AD; }
+  .dA .item .t { flex: 1; min-width: 0; font-weight: 500; }
+  .dA .meta { display: block; margin-top: 3px; font-family: ui-monospace, monospace; font-size: 0.68rem; color: #5C6068; font-weight: 400; }
+  .dA .meta .who { color: #2B4BD7; font-weight: 700; }
+  .dA .note { display: block; margin-top: 5px; font-size: 0.84rem; font-weight: 400; color: #5C6068; }
+  .dA .filechip { display: flex; align-items: center; gap: 10px; margin: 6px 16px 16px 54px; background: #FBF3DF; border: 1.5px solid #F2B33D; border-radius: 10px; padding: 9px 12px; font-size: 0.8rem; color: #16181D; text-decoration: none; }
+  .dA .filechip .ext { font-family: ui-monospace, monospace; font-weight: 700; font-size: 0.64rem; letter-spacing: 0.08em; background: #F2B33D; color: #16181D; padding: 3px 6px; border-radius: 5px; }
+  .dA .filechip .fn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dA .listgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 460px) { .dA .listgrid { grid-template-columns: 1fr; } }
+  .dA .listcard { background: #fff; border: 1px solid #E2E4DF; border-radius: 16px; padding: 16px; box-shadow: 0 2px 8px rgba(22,24,29,0.06); display: flex; flex-direction: column; gap: 4px; }
+  .dA .listcard .row { display: flex; align-items: center; gap: 8px; }
+  .dA .listcard .chipp { width: 10px; height: 10px; border-radius: 3px; background: #E0492F; }
+  .dA .listcard h3 { margin: 0; font-size: 0.95rem; font-weight: 800; }
+  .dA .listcard .n { margin-left: auto; font-family: ui-monospace, monospace; font-size: 0.7rem; color: #5C6068; }
+  .dA .listcard p { margin: 0; font-size: 0.78rem; color: #5C6068; }
+  .dA .act .row { display: flex; gap: 14px; align-items: baseline; padding: 11px 0; border-top: 1px solid #E2E4DF; }
+  .dA .act .row:first-child { border-top: 2px solid #16181D; }
+  .dA .when { font-family: ui-monospace, monospace; font-size: 0.68rem; color: #5C6068; width: 92px; flex-shrink: 0; }
+  .dA .what { font-size: 0.88rem; }
+  .dA footer { margin-top: 56px; font-size: 0.74rem; color: #5C6068; }
+
+  /* ============ B · JOURNAL (kept in ink) ============ */
+  .dB {
+    background: #F8F6F0; color: #1E2126;
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  }
+  .dB .page {
+    max-width: 640px; margin: 0 auto; padding: 0 20px 110px;
+    border-left: 2px solid rgba(179, 58, 43, 0.35); /* the margin rule */
+  }
+  @media (min-width: 700px) { .dB .page { padding-left: 34px; } }
+  .dB .top { padding: 48px 0 10px; }
+  .dB .kicker { font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: #2F4A8A; }
+  .dB h1 { margin: 6px 0 4px; font-size: clamp(2.2rem, 8vw, 3rem); font-weight: 500; font-style: italic; letter-spacing: -0.01em; line-height: 1.05; }
+  .dB .subline { font-size: 0.9rem; color: #6B6E66; font-style: italic; }
+  .dB .sync { font-family: ui-monospace, monospace; font-style: normal; font-size: 0.68rem; color: #8A8D84; }
+  .dB .stats { display: flex; gap: 26px; margin: 26px 0 6px; padding: 12px 0; border-top: 1px solid #1E2126; border-bottom: 1px solid #D9D5C8; }
+  .dB .stat b { font-size: 1.5rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .dB .stat span { font-size: 0.78rem; color: #6B6E66; font-style: italic; margin-left: 5px; }
+  .dB section { margin-top: 46px; }
+  .dB h2 { margin: 0 0 4px; font-size: 0.78rem; font-family: system-ui, sans-serif; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #2F4A8A; display: flex; justify-content: space-between; align-items: baseline; }
+  .dB h2 .src { font-family: ui-monospace, monospace; font-weight: 400; letter-spacing: 0; text-transform: none; font-size: 0.64rem; color: #8A8D84; }
+  .dB .rule { border: none; border-top: 1px solid #1E2126; margin: 0 0 4px; }
+  .dB .item { display: flex; gap: 14px; align-items: flex-start; padding: 13px 0; border-bottom: 1px dotted #C9C5B6; }
+  .dB label.item { cursor: pointer; }
+  .dB .item input { appearance: none; width: 19px; height: 19px; margin: 4px 0 0; border: 1.8px solid #1E2126; border-radius: 2px; background: none; cursor: pointer; flex-shrink: 0; position: relative; }
+  .dB .item input:checked::after { content: "✕"; position: absolute; inset: -2px 0 0 0; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #B33A2B; font-family: Georgia, serif; }
+  .dB .item input:focus-visible { outline: 2px solid #2F4A8A; outline-offset: 2px; }
+  .dB .item.checked .t { color: #9B9E94; text-decoration: line-through; text-decoration-color: #B33A2B; }
+  .dB .item .t { flex: 1; min-width: 0; font-size: 1.05rem; }
+  .dB .meta { display: block; font-family: ui-monospace, monospace; font-size: 0.64rem; color: #8A8D84; margin-top: 3px; }
+  .dB .meta .who { color: #B33A2B; }
+  .dB .note { display: block; font-size: 0.9rem; color: #6B6E66; margin-top: 4px; font-style: italic; }
+  .dB .filechip { display: inline-flex; gap: 10px; align-items: baseline; margin: 12px 0 2px 33px; padding: 8px 12px; border: 1px solid #2F4A8A; border-radius: 3px; background: rgba(47, 74, 138, 0.05); font-size: 0.85rem; color: #1E2126; text-decoration: none; max-width: 100%; }
+  .dB .filechip .ext { font-family: ui-monospace, monospace; font-size: 0.62rem; font-weight: 700; color: #2F4A8A; letter-spacing: 0.08em; }
+  .dB .filechip .fn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dB .listgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 34px; }
+  @media (max-width: 460px) { .dB .listgrid { grid-template-columns: 1fr; } }
+  .dB .listcard { padding: 12px 0; border-bottom: 1px dotted #C9C5B6; }
+  .dB .listcard .row { display: flex; align-items: baseline; gap: 8px; }
+  .dB .listcard h3 { margin: 0; font-size: 1.02rem; font-weight: 600; }
+  .dB .listcard .n { margin-left: auto; font-family: ui-monospace, monospace; font-size: 0.66rem; color: #8A8D84; }
+  .dB .listcard p { margin: 2px 0 0; font-size: 0.82rem; color: #6B6E66; font-style: italic; }
+  .dB .act .row { display: flex; gap: 16px; align-items: baseline; padding: 10px 0; border-bottom: 1px dotted #C9C5B6; }
+  .dB .when { font-family: ui-monospace, monospace; font-size: 0.66rem; color: #8A8D84; width: 92px; flex-shrink: 0; }
+  .dB .what { font-size: 0.95rem; }
+  .dB .what b { font-weight: 600; color: #2F4A8A; }
+  .dB footer { margin-top: 56px; font-size: 0.8rem; color: #8A8D84; font-style: italic; }
+
+  /* ============ C · TILES (Mediterranean floor) ============ */
+  .dC {
+    background: #F1EBE0; color: #24312E;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .dC .band {
+    height: 26px;
+    background:
+      radial-gradient(circle at 50% 50%, #C89B3C 0 4px, transparent 4px),
+      radial-gradient(circle at 0% 50%, #16646B 0 6px, transparent 6px),
+      radial-gradient(circle at 100% 50%, #16646B 0 6px, transparent 6px),
+      linear-gradient(#F7F3EA, #F7F3EA);
+    background-size: 26px 26px;
+    border-bottom: 2px solid #16646B;
+  }
+  .dC .top { padding: 34px 0 18px; text-align: center; }
+  .dC .tilemark { display: inline-grid; grid-template-columns: 14px 14px; gap: 3px; margin-bottom: 14px; }
+  .dC .tilemark i { width: 14px; height: 14px; }
+  .dC .tilemark i:nth-child(1) { background: #16646B; border-radius: 50% 0 0 0; }
+  .dC .tilemark i:nth-child(2) { background: #C89B3C; border-radius: 0 50% 0 0; }
+  .dC .tilemark i:nth-child(3) { background: #C4633F; border-radius: 0 0 0 50%; }
+  .dC .tilemark i:nth-child(4) { background: #3E8E97; border-radius: 0 0 50% 0; }
+  .dC h1 { margin: 0; font-size: clamp(2.1rem, 8vw, 2.9rem); font-weight: 700; letter-spacing: 0.01em; color: #16646B; }
+  .dC h1 .amp { color: #C4633F; }
+  .dC .subline { margin-top: 6px; font-size: 0.85rem; color: #62705F; }
+  .dC .sync { font-family: ui-monospace, monospace; font-size: 0.68rem; color: #8B937F; display: block; margin-top: 4px; }
+  .dC .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 22px; }
+  .dC .stat { background: #F7F3EA; border: 1.5px solid #16646B; border-radius: 14px; padding: 12px; text-align: center; position: relative; overflow: hidden; }
+  .dC .stat::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 5px; background: repeating-linear-gradient(90deg, #16646B 0 10px, #C89B3C 10px 20px, #C4633F 20px 30px); opacity: 0.85; }
+  .dC .stat b { display: block; font-size: 1.9rem; font-weight: 800; color: #16646B; font-variant-numeric: tabular-nums; }
+  .dC .stat span { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.09em; color: #62705F; }
+  .dC section { margin-top: 42px; }
+  .dC .sechead { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .dC .minitile { display: grid; grid-template-columns: 7px 7px; gap: 2px; }
+  .dC .minitile i { width: 7px; height: 7px; background: #16646B; }
+  .dC .minitile i:nth-child(2) { background: #C89B3C; }
+  .dC .minitile i:nth-child(3) { background: #C4633F; }
+  .dC .minitile i:nth-child(4) { background: #3E8E97; }
+  .dC .sechead h2 { margin: 0; font-size: 1.1rem; font-weight: 700; color: #24312E; }
+  .dC .sechead .src { margin-left: auto; font-family: ui-monospace, monospace; font-size: 0.66rem; color: #8B937F; }
+  .dC .card { background: #FDFBF6; border: 1.5px solid #DCD3C0; border-radius: 18px; overflow: hidden; box-shadow: 0 3px 10px rgba(22, 100, 107, 0.07); }
+  .dC .item { display: flex; align-items: flex-start; gap: 14px; padding: 15px 16px; border-top: 1px solid #EAE3D4; }
+  .dC .item:first-child { border-top: none; }
+  .dC label.item { cursor: pointer; }
+  .dC label.item:hover { background: #F2EEE2; }
+  .dC .item input { appearance: none; width: 22px; height: 22px; margin: 2px 0 0; border: 2px solid #16646B; transform: rotate(45deg); border-radius: 4px; background: none; cursor: pointer; flex-shrink: 0; position: relative; }
+  .dC .item input:checked { background: #16646B; }
+  .dC .item input:checked::after { content: ""; position: absolute; inset: 4px; background: #C89B3C; border-radius: 2px; }
+  .dC .item input:focus-visible { outline: 3px solid #C89B3C; outline-offset: 3px; }
+  .dC .item.checked .t { text-decoration: line-through; color: #A3A695; }
+  .dC .item .t { flex: 1; min-width: 0; font-weight: 500; }
+  .dC .meta { display: block; margin-top: 3px; font-family: ui-monospace, monospace; font-size: 0.68rem; color: #8B937F; font-weight: 400; }
+  .dC .meta .who { color: #C4633F; font-weight: 700; }
+  .dC .note { display: block; margin-top: 5px; font-size: 0.84rem; color: #62705F; font-weight: 400; }
+  .dC .filechip { display: flex; align-items: center; gap: 10px; margin: 6px 16px 16px 52px; background: #FDF6E3; border: 1.5px dashed #C89B3C; border-radius: 12px; padding: 9px 12px; font-size: 0.8rem; color: #24312E; text-decoration: none; }
+  .dC .filechip .ext { font-family: ui-monospace, monospace; font-weight: 700; font-size: 0.64rem; background: #C89B3C; color: #24312E; padding: 3px 6px; border-radius: 6px; }
+  .dC .filechip .fn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dC .listgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 460px) { .dC .listgrid { grid-template-columns: 1fr; } }
+  .dC .listcard { background: #FDFBF6; border: 1.5px solid #DCD3C0; border-radius: 18px; padding: 15px; position: relative; overflow: hidden; }
+  .dC .listcard::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: repeating-linear-gradient(90deg, #16646B 0 9px, #C89B3C 9px 18px, #C4633F 18px 27px); opacity: 0.7; }
+  .dC .listcard .row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+  .dC .listcard h3 { margin: 0; font-size: 0.95rem; font-weight: 700; color: #16646B; }
+  .dC .listcard .n { margin-left: auto; font-family: ui-monospace, monospace; font-size: 0.7rem; color: #8B937F; }
+  .dC .listcard p { margin: 4px 0 0; font-size: 0.78rem; color: #62705F; }
+  .dC .act .row { display: flex; gap: 14px; align-items: baseline; padding: 11px 14px; }
+  .dC .act .row:nth-child(odd) { background: #F7F3EA; border-radius: 10px; }
+  .dC .when { font-family: ui-monospace, monospace; font-size: 0.68rem; color: #8B937F; width: 92px; flex-shrink: 0; }
+  .dC .what { font-size: 0.88rem; }
+  .dC .what b { color: #16646B; }
+  .dC footer { margin-top: 56px; font-size: 0.74rem; color: #8B937F; text-align: center; }
+
+  #toast {
+    position: fixed; left: 50%; bottom: 74px; transform: translateX(-50%) translateY(120px);
+    background: #16181D; color: #F4F5F2; border-radius: 10px; padding: 11px 18px;
+    font: 500 0.8rem system-ui, sans-serif; transition: transform 0.25s ease; max-width: 90vw; z-index: 60;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+  @media (prefers-reduced-motion: reduce) { #toast { transition: none; } }
+</style>
+
+<!-- ================= A ================= -->
+<div class="design dA">
+  <div class="wrap">
+    <header class="top">
+      <div class="magnets" aria-hidden="true"><div class="mag circle"></div><div class="mag tri"></div><div class="mag square"></div></div>
+      <h1>Dor <span class="amp">&amp;</span> Tal</h1>
+      <div class="subline"><span>The family notebook, kept by our assistant</span><span class="sync"><i></i>synced Aug 7 · 06:50</span></div>
+    </header>
+    <div class="stats">
+      <div class="stat"><b>1</b><span>Open todo</span></div>
+      <div class="stat"><b>2</b><span>Trip places</span></div>
+      <div class="stat"><b>1</b><span>Document</span></div>
+    </div>
+    <section>
+      <div class="sechead"><div class="mag circle" aria-hidden="true"></div><h2>Todos</h2><span class="src">todos.md</span></div>
+      <div class="card">
+        <label class="item"><input type="checkbox" aria-label="Mark done"><span class="t">Buy bread and butter<span class="meta"><span class="who">Dor</span> · Aug 4</span></span></label>
+      </div>
+    </section>
+    <section>
+      <div class="sechead"><div class="mag tri" aria-hidden="true"></div><h2>Slovakia trip</h2><span class="src">travel/slovakia.md</span></div>
+      <div class="card">
+        <label class="item"><input type="checkbox" aria-label="Mark visited"><span class="t">Štrbské Pleso<span class="meta"><span class="who">Tal</span> · Aug 6</span></span></label>
+        <label class="item"><input type="checkbox" aria-label="Mark visited"><span class="t">Suchá Belá<span class="note">קניון עם סולמות מתכת, כ־50–60 דקות. עם ילד בן 5: רק אם מטפס בביטחון — אחרת עדיף Tomášovský výhľad.</span><span class="meta"><span class="who">Dor</span> · Aug 7</span></span></label>
+        <a class="filechip" href="#" onclick="toast('The live dashboard opens the PDF here'); return false;"><span class="ext">PDF</span><span class="fn">Highway vignette — valid 08.08 – 06.09 · car WD4037W</span></a>
+      </div>
+    </section>
+    <section>
+      <div class="sechead"><div class="mag square" aria-hidden="true"></div><h2>Lists</h2><span class="src">lists/</span></div>
+      <div class="listgrid">
+        <div class="listcard"><div class="row"><span class="chipp"></span><h3>Books</h3><span class="n">0</span></div><p>Text the bot any title to start this list.</p></div>
+        <div class="listcard"><div class="row"><span class="chipp"></span><h3>TV &amp; Movies</h3><span class="n">0</span></div><p>“the bear — tal wants to watch”</p></div>
+        <div class="listcard"><div class="row"><span class="chipp"></span><h3>Places to Visit</h3><span class="n">0</span></div><p>Somewhere you keep meaning to go.</p></div>
+        <div class="listcard"><div class="row"><span class="chipp"></span><h3>Restaurants &amp; Cafés</h3><span class="n">0</span></div><p>That place someone recommended.</p></div>
+        <div class="listcard"><div class="row"><span class="chipp"></span><h3>Learning &amp; Courses</h3><span class="n">0</span></div><p>Things to learn, someday-maybe.</p></div>
+        <div class="listcard"><div class="row"><span class="chipp"></span><h3>Gift Ideas</h3><span class="n">0</span></div><p>Quietly save ideas for each other.</p></div>
+      </div>
+    </section>
+    <section class="act">
+      <div class="sechead"><div class="mag circle" aria-hidden="true"></div><h2>Recent activity</h2><span class="src">git history</span></div>
+      <div class="row"><span class="when">Aug 7 · 06:50</span><span class="what"><b>Dor</b> filed the Slovakia vignette PDF</span></div>
+      <div class="row"><span class="when">Aug 7 · 06:46</span><span class="what"><b>Dor</b> added Suchá Belá with route notes</span></div>
+      <div class="row"><span class="when">Aug 6 · 08:11</span><span class="what"><b>Tal</b> added Štrbské Pleso</span></div>
+      <div class="row"><span class="when">Aug 5 · 07:13</span><span class="what">Notebook created</span></div>
+    </section>
+    <footer>Mockup from your real notebook · checkboxes are demo-only.</footer>
+  </div>
+</div>
+
+<!-- ================= B ================= -->
+<div class="design dB">
+  <div class="page">
+    <header class="top">
+      <div class="kicker">The household record of</div>
+      <h1>Dor &amp; Tal</h1>
+      <div class="subline">kept in trust by our assistant · <span class="sync">synced Aug 7, 06:50</span></div>
+    </header>
+    <div class="stats">
+      <div class="stat"><b>1</b><span>open todo</span></div>
+      <div class="stat"><b>2</b><span>trip places</span></div>
+      <div class="stat"><b>1</b><span>document</span></div>
+    </div>
+    <section>
+      <h2>Todos <span class="src">todos.md</span></h2>
+      <hr class="rule">
+      <label class="item"><input type="checkbox" aria-label="Mark done"><span class="t">Buy bread and butter<span class="meta"><span class="who">Dor</span> · Aug 4</span></span></label>
+    </section>
+    <section>
+      <h2>Slovakia trip <span class="src">travel/slovakia.md</span></h2>
+      <hr class="rule">
+      <label class="item"><input type="checkbox" aria-label="Mark visited"><span class="t">Štrbské Pleso<span class="meta"><span class="who">Tal</span> · Aug 6</span></span></label>
+      <label class="item"><input type="checkbox" aria-label="Mark visited"><span class="t">Suchá Belá<span class="note">קניון עם סולמות מתכת, כ־50–60 דקות. עם ילד בן 5: רק אם מטפס בביטחון — אחרת עדיף Tomášovský výhľad.</span><span class="meta"><span class="who">Dor</span> · Aug 7</span></span></label>
+      <a class="filechip" href="#" onclick="toast('The live dashboard opens the PDF here'); return false;"><span class="ext">PDF</span><span class="fn">Highway vignette — valid 08.08 – 06.09 · car WD4037W</span></a>
+    </section>
+    <section>
+      <h2>Lists <span class="src">lists/</span></h2>
+      <hr class="rule">
+      <div class="listgrid">
+        <div class="listcard"><div class="row"><h3>Books</h3><span class="n">0</span></div><p>Text the bot any title to begin.</p></div>
+        <div class="listcard"><div class="row"><h3>TV &amp; Movies</h3><span class="n">0</span></div><p>“the bear — tal wants to watch”</p></div>
+        <div class="listcard"><div class="row"><h3>Places to Visit</h3><span class="n">0</span></div><p>Somewhere you keep meaning to go.</p></div>
+        <div class="listcard"><div class="row"><h3>Restaurants &amp; Cafés</h3><span class="n">0</span></div><p>That place someone recommended.</p></div>
+        <div class="listcard"><div class="row"><h3>Learning &amp; Courses</h3><span class="n">0</span></div><p>Things to learn, someday.</p></div>
+        <div class="listcard"><div class="row"><h3>Gift Ideas</h3><span class="n">0</span></div><p>Quiet ideas for each other.</p></div>
+      </div>
+    </section>
+    <section class="act">
+      <h2>Recent activity <span class="src">git history</span></h2>
+      <hr class="rule">
+      <div class="row"><span class="when">Aug 7 · 06:50</span><span class="what"><b>Dor</b> filed the Slovakia vignette PDF</span></div>
+      <div class="row"><span class="when">Aug 7 · 06:46</span><span class="what"><b>Dor</b> added Suchá Belá with route notes</span></div>
+      <div class="row"><span class="when">Aug 6 · 08:11</span><span class="what"><b>Tal</b> added Štrbské Pleso</span></div>
+      <div class="row"><span class="when">Aug 5 · 07:13</span><span class="what">Notebook created</span></div>
+    </section>
+    <footer>Mockup from your real notebook — checkboxes are demo-only here.</footer>
+  </div>
+</div>
+
+<!-- ================= C ================= -->
+<div class="design dC">
+  <div class="band" aria-hidden="true"></div>
+  <div class="wrap">
+    <header class="top">
+      <div class="tilemark" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <h1>Dor <span class="amp">&amp;</span> Tal</h1>
+      <div class="subline">The family notebook, kept by our assistant<span class="sync">synced Aug 7 · 06:50</span></div>
+    </header>
+    <div class="stats">
+      <div class="stat"><b>1</b><span>Open todo</span></div>
+      <div class="stat"><b>2</b><span>Trip places</span></div>
+      <div class="stat"><b>1</b><span>Document</span></div>
+    </div>
+    <section>
+      <div class="sechead"><div class="minitile" aria-hidden="true"><i></i><i></i><i></i><i></i></div><h2>Todos</h2><span class="src">todos.md</span></div>
+      <div class="card">
+        <label class="item"><input type="checkbox" aria-label="Mark done"><span class="t">Buy bread and butter<span class="meta"><span class="who">Dor</span> · Aug 4</span></span></label>
+      </div>
+    </section>
+    <section>
+      <div class="sechead"><div class="minitile" aria-hidden="true"><i></i><i></i><i></i><i></i></div><h2>Slovakia trip</h2><span class="src">travel/slovakia.md</span></div>
+      <div class="card">
+        <label class="item"><input type="checkbox" aria-label="Mark visited"><span class="t">Štrbské Pleso<span class="meta"><span class="who">Tal</span> · Aug 6</span></span></label>
+        <label class="item"><input type="checkbox" aria-label="Mark visited"><span class="t">Suchá Belá<span class="note">קניון עם סולמות מתכת, כ־50–60 דקות. עם ילד בן 5: רק אם מטפס בביטחון — אחרת עדיף Tomášovský výhľad.</span><span class="meta"><span class="who">Dor</span> · Aug 7</span></span></label>
+        <a class="filechip" href="#" onclick="toast('The live dashboard opens the PDF here'); return false;"><span class="ext">PDF</span><span class="fn">Highway vignette — valid 08.08 – 06.09 · car WD4037W</span></a>
+      </div>
+    </section>
+    <section>
+      <div class="sechead"><div class="minitile" aria-hidden="true"><i></i><i></i><i></i><i></i></div><h2>Lists</h2><span class="src">lists/</span></div>
+      <div class="listgrid">
+        <div class="listcard"><div class="row"><h3>Books</h3><span class="n">0</span></div><p>Text the bot any title to start this list.</p></div>
+        <div class="listcard"><div class="row"><h3>TV &amp; Movies</h3><span class="n">0</span></div><p>“the bear — tal wants to watch”</p></div>
+        <div class="listcard"><div class="row"><h3>Places to Visit</h3><span class="n">0</span></div><p>Somewhere you keep meaning to go.</p></div>
+        <div class="listcard"><div class="row"><h3>Restaurants &amp; Cafés</h3><span class="n">0</span></div><p>That place someone recommended.</p></div>
+        <div class="listcard"><div class="row"><h3>Learning &amp; Courses</h3><span class="n">0</span></div><p>Things to learn, someday-maybe.</p></div>
+        <div class="listcard"><div class="row"><h3>Gift Ideas</h3><span class="n">0</span></div><p>Quietly save ideas for each other.</p></div>
+      </div>
+    </section>
+    <section class="act">
+      <div class="sechead"><div class="minitile" aria-hidden="true"><i></i><i></i><i></i><i></i></div><h2>Recent activity</h2><span class="src">git history</span></div>
+      <div class="row"><span class="when">Aug 7 · 06:50</span><span class="what"><b>Dor</b> filed the Slovakia vignette PDF</span></div>
+      <div class="row"><span class="when">Aug 7 · 06:46</span><span class="what"><b>Dor</b> added Suchá Belá with route notes</span></div>
+      <div class="row"><span class="when">Aug 6 · 08:11</span><span class="what"><b>Tal</b> added Štrbské Pleso</span></div>
+      <div class="row"><span class="when">Aug 5 · 07:13</span><span class="what">Notebook created</span></div>
+    </section>
+    <footer>Mockup from your real notebook · checkboxes are demo-only.</footer>
+  </div>
+  <div class="band" aria-hidden="true"></div>
+</div>
+
+<div id="toast" role="status"></div>
+<nav id="bar" aria-label="Design options">
+  <button type="button" data-d="A" aria-pressed="true">A · Magnets</button>
+  <button type="button" data-d="B" aria-pressed="false">B · Journal</button>
+  <button type="button" data-d="C" aria-pressed="false">C · Tiles</button>
+</nav>
+<script>
+  document.body.dataset.pick = "A";
+  document.querySelectorAll("#bar button").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.body.dataset.pick = btn.dataset.d;
+      document.querySelectorAll("#bar button").forEach((b) =>
+        b.setAttribute("aria-pressed", String(b === btn)));
+      window.scrollTo({ top: 0 });
+    });
+  });
+  let timer;
+  function toast(msg) {
+    const el = document.getElementById("toast");
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(timer);
+    timer = setTimeout(() => el.classList.remove("show"), 2600);
+  }
+  document.querySelectorAll('.item input[type="checkbox"]').forEach((box) => {
+    box.addEventListener("change", () => {
+      box.closest(".item").classList.toggle("checked", box.checked);
+      toast(box.checked ? "Demo only — live, this tells the assistant to mark it done" : "Unchecked (demo only)");
+    });
+  });
+</script>
