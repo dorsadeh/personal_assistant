@@ -18,7 +18,19 @@ def sync_workspace(workspace: Path, summary: str) -> bool:
             summary = " ".join(summary.split()) or "update"
             _git(workspace, "commit", "-m", f"assistant: {summary[:50]}")
             committed = True
-        _git(workspace, "push")
+        try:
+            _git(workspace, "push")
+        except subprocess.CalledProcessError:
+            _git(workspace, "fetch", "origin")
+            try:
+                _git(workspace, "pull", "--rebase")
+            except subprocess.CalledProcessError:
+                try:
+                    _git(workspace, "rebase", "--abort")
+                except subprocess.CalledProcessError:
+                    pass
+                raise
+            _git(workspace, "push")
     except Exception:
         log.exception("workspace sync incomplete")
     return committed

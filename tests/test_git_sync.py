@@ -95,3 +95,36 @@ def test_unexpected_error_does_not_raise(tmp_path, monkeypatch):
 
     monkeypatch.setattr(gs.subprocess, "run", boom)
     assert sync_workspace(tmp_path, "Dor: x") is False
+
+
+def _clone(tmp_path, origin, name):
+    dest = tmp_path / name
+    subprocess.run(["git", "clone", str(origin), str(dest)], check=True, capture_output=True, text=True)
+    _run(dest, "config", "user.email", "other@test")
+    _run(dest, "config", "user.name", "Other")
+    return dest
+
+
+def test_diverged_remote_rebases_and_pushes(tmp_path):
+    ws, origin = _make_workspace(tmp_path)
+    other = _clone(tmp_path, origin, "other")
+    (other / "lists.md").write_text("from dashboard\n")
+    _run(other, "add", "-A"); _run(other, "commit", "-m", "dashboard: edit"); _run(other, "push")
+    (ws / "todos.md").write_text("# Todos\n- [ ] new\n")
+    assert sync_workspace(ws, "Dor: add todo") is True
+    log = subprocess.run(["git", "log", "--format=%s", "main"], cwd=origin,
+                         check=True, capture_output=True, text=True).stdout
+    assert "assistant: Dor: add todo" in log and "dashboard: edit" in log
+
+
+def test_rebase_conflict_aborts_cleanly(tmp_path):
+    ws, origin = _make_workspace(tmp_path)
+    other = _clone(tmp_path, origin, "other2")
+    (other / "todos.md").write_text("# Todos\n- [x] milk\n")
+    _run(other, "add", "-A"); _run(other, "commit", "-m", "dashboard: check"); _run(other, "push")
+    (ws / "todos.md").write_text("# Todos\n- [ ] milk (edited)\n")
+    sync_workspace(ws, "Dor: edit")  # must not raise
+    status = subprocess.run(["git", "status", "--porcelain"], cwd=ws,
+                            check=True, capture_output=True, text=True).stdout
+    assert not (ws / ".git" / "rebase-merge").exists()  # no rebase in progress
+    assert status.strip() == ""  # committed locally, tree clean
